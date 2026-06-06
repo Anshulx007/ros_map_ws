@@ -89,6 +89,9 @@ Explore::Explore(rclcpp::Node::SharedPtr node)
   nav_to_pose_client_ =
       rclcpp_action::create_client<NavigateToPose>(node_, "navigate_to_pose");
 
+  cleanup_trigger_pub_ =
+      node_->create_publisher<std_msgs::msg::Bool>("/explore/cleanup_trigger", 10);
+
   RCLCPP_INFO(node_->get_logger(), "Waiting to connect to navigate_to_pose server");
   nav_to_pose_client_->wait_for_action_server();
   RCLCPP_INFO(node_->get_logger(), "Connected to navigate_to_pose server");
@@ -203,6 +206,9 @@ void Explore::makePlan()
 
   if (frontiers.empty()) {
     stop();
+    auto trigger_msg = std_msgs::msg::Bool();
+    trigger_msg.data = true;
+    cleanup_trigger_pub_->publish(trigger_msg);
     return;
   }
 

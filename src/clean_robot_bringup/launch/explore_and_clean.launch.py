@@ -56,10 +56,25 @@ def generate_launch_description():
         output='screen'
     )
 
+    # Path Planning Node (Coverage Planner)
+    path_planning_node = Node(
+        package='clean_robot',
+        executable='path_planning_node',
+        name='path_planning',
+        parameters=[{
+            'use_sim_time': True,
+            'costmap_name': 'global_costmap/costmap',
+            'size_of_cell': 3,
+            'grid_covered_value': 0
+        }],
+        output='screen'
+    )
+
     return LaunchDescription([
         DeclareLaunchArgument('use_rviz', default_value='True', description='Whether to start RViz'),
         DeclareLaunchArgument('headless', default_value='True', description='Whether to run Gazebo headless'),
         sim_launch,
         explore_node,
-        next_goal_node
+        next_goal_node,
+        path_planning_node
     ])

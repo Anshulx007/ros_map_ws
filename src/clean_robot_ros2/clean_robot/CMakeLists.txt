@@ -9,11 +9,15 @@ find_package(OpenCV REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
+find_package(std_msgs REQUIRED)
 
-include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(
+  include
+  ${OpenCV_INCLUDE_DIRS}
+)
 
 add_executable(next_goal_node src/next_goal.cpp)
-add_executable(path_planning_node src/PathPlanningNode.cpp)
+add_executable(path_planning_node src/PathPlanningNode.cpp src/CleaningPathPlanner.cpp)
 
 ament_target_dependencies(next_goal_node
   rclcpp
@@ -26,6 +30,7 @@ ament_target_dependencies(path_planning_node
   tf2
   tf2_ros
   nav2_costmap_2d
+  std_msgs
 )
 
 target_link_libraries(path_planning_node

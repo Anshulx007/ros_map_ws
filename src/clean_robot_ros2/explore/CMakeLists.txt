@@ -20,6 +20,7 @@ find_package(tf2_ros REQUIRED)
 
 find_package(nav2_costmap_2d REQUIRED)
 find_package(nav2_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 
 add_executable(explore_node
   src/explore.cpp
@@ -47,6 +48,7 @@ ament_target_dependencies(
 
   nav2_costmap_2d
   nav2_msgs
+  std_msgs
 )
 
 install(TARGETS

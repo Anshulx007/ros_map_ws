@@ -55,6 +55,7 @@
 
 #include <explore/costmap_client.h>
 #include <explore/frontier_search.h>
+#include <std_msgs/msg/bool.hpp>
 
 namespace explore
 {
@@ -111,6 +112,7 @@ private:
   rclcpp::Time last_progress_;
   size_t last_markers_count_;
 
+  rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr cleanup_trigger_pub_;
   // parameters
   double planner_frequency_;
   double potential_scale_, orientation_scale_, gain_scale_;

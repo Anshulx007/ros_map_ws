@@ -55,7 +55,7 @@ vector<geometry_msgs::msg::PoseStamped> CleaningPathPlanning::GetPathInROS()
     if (!pathVecInROS_.empty())
         pathVecInROS_.clear(); //清空操作
     geometry_msgs::msg::PoseStamped posestamped;
-    geometry_msgs::Pose pose;
+    geometry_msgs::msg::Pose pose;
     vector<cellIndex> cellvec;
     cellvec = GetPathInCV();
     /*trasnsform*/
@@ -86,7 +86,7 @@ vector<geometry_msgs::msg::PoseStamped> CleaningPathPlanning::GetBorderTrackingP
     if (!pathVecInROS_.empty())
         pathVecInROS_.clear();
     geometry_msgs::msg::PoseStamped posestamped;
-    geometry_msgs::Pose pose;
+    geometry_msgs::msg::Pose pose;
     vector<cv::Point2i> resultCV;
     GetBorderTrackingPathInCV(resultCV);
     vector<bool> visitedVec;
@@ -233,7 +233,7 @@ void CleaningPathPlanning::PublishGrid()
 {
     if (!initialized_)
         initializeCoveredGrid();
-    grid_pub_.publish(covered_path_grid_);
+    grid_pub_->publish(covered_path_grid_);
 }
 
 vector<cellIndex> CleaningPathPlanning::GetPathInCV()
@@ -251,7 +251,7 @@ void CleaningPathPlanning::publishPlan(const std::vector<geometry_msgs::msg::Pos
 {
     if (!initialized_)
     {
-        ROS_ERROR(
+        RCLCPP_ERROR(rclcpp::get_logger("clean_robot"),
             "This planner has not been initialized yet, but it is being used, please call initialize() before use");
         return;
     }
@@ -269,7 +269,7 @@ void CleaningPathPlanning::publishPlan(const std::vector<geometry_msgs::msg::Pos
         gui_path.poses[i] = path[i];
     }
 
-    plan_pub_.publish(gui_path);
+    plan_pub_->publish(gui_path);
 }
 
 bool CleaningPathPlanning::cellContainsPoint(Point2i pt, cellIndex cell)
@@ -307,7 +307,7 @@ void CleaningPathPlanning::getCellMatAndFreeSpace(Mat srcImg, Mat &cellMat, vect
             {
                 for (j = 0; j < SIZE_OF_CELL; j++)
                 {
-                    if (srcImg.at<uchar>(r * SIZE_OF_CELL + i, c * SIZE_OF_CELL + j) != costmap_2d::FREE_SPACE)
+                    if (srcImg.at<uchar>(r * SIZE_OF_CELL + i, c * SIZE_OF_CELL + j) != nav2_costmap_2d::FREE_SPACE)
                     {
                         isFree = false;
                         i = SIZE_OF_CELL;
@@ -322,11 +322,11 @@ void CleaningPathPlanning::getCellMatAndFreeSpace(Mat srcImg, Mat &cellMat, vect
                 ci.col = c;
                 ci.theta = 0;
                 freeSpaceVec.push_back(ci);
-                cellMat.at<uchar>(r, c) = costmap_2d::FREE_SPACE; //0
+                cellMat.at<uchar>(r, c) = nav2_costmap_2d::FREE_SPACE; //0
             }
             else
             {
-                cellMat.at<uchar>(r, c) = costmap_2d::LETHAL_OBSTACLE;
+                cellMat.at<uchar>(r, c) = nav2_costmap_2d::LETHAL_OBSTACLE;
             } //254
         }
     }
@@ -342,7 +342,7 @@ void CleaningPathPlanning::initializeNeuralMat(Mat cellMat, Mat neuralizedMat)
     {
         for (j = 0; j < neuralizedMat.cols; j++)
         {
-            if (cellMat.at<uchar>(i, j) == costmap_2d::LETHAL_OBSTACLE)
+            if (cellMat.at<uchar>(i, j) == nav2_costmap_2d::LETHAL_OBSTACLE)
                 neuralizedMat.at<float>(i, j) = -100000.0; 
             else
                 neuralizedMat.at<float>(i, j) = 50.0 / j; //这里的1.0/j的用意是什么？这里有没有考虑到j=0时刻的问题呢？   hjr注
@@ -400,7 +400,7 @@ void CleaningPathPlanning::mainPlanningLoop()
     bool isok = costmap2d_ros_->getRobotPose(initPose_);
     if (!isok)
     {
-        ROS_INFO("Failed to get robot location! Please check where goes wrong!");
+        RCLCPP_INFO(rclcpp::get_logger("clean_robot"), "Failed to get robot location! Please check where goes wrong!");
         return;
     }
     //initPoint.row = initPose_.getOrigin().y()
@@ -413,7 +413,7 @@ void CleaningPathPlanning::mainPlanningLoop()
     bool getmapcoor = costmap2d_->worldToMap(wx, wy, mx, my);
     if (!getmapcoor)
     {
-        ROS_INFO("Failed to get robot location in map! Please check where goes wrong!");
+        RCLCPP_INFO(rclcpp::get_logger("clean_robot"), "Failed to get robot location in map! Please check where goes wrong!");
         return;
     }
     initPoint.row = cellMat_.rows - my / SIZE_OF_CELL - 1; //再研究一下这个行列之间的转换问题。
@@ -585,8 +585,8 @@ void CleaningPathPlanning::mainPlanningLoop()
             }
             else //产生了自锁现象
             {
-                ROS_INFO("The program has been dead because of the self-locking");
-                ROS_INFO("The program has gone through %ld steps", pathVec_.size());
+                RCLCPP_INFO(rclcpp::get_logger("clean_robot"), "The program has been dead because of the self-locking");
+                RCLCPP_INFO(rclcpp::get_logger("clean_robot"), "The program has gone through %ld steps", pathVec_.size());
                 break;
             }
         }
@@ -668,7 +668,7 @@ bool CleaningPathPlanning::findElement(vector<Point2i> pointsVec, Point2i pt, in
 
 bool CleaningPathPlanning::initializeCoveredGrid() //在这里我对CoverGrid的理解为覆盖栅格。
 {
-    boost::unique_lock<costmap_2d::Costmap2D::mutex_t> lock(*(costmap2d_->getMutex()));
+    std::lock_guard<nav2_costmap_2d::Costmap2D::mutex_t> lock(*(costmap2d_->getMutex()));
     double resolution = costmap2d_->getResolution(); //分辨率
 
     covered_path_grid_.header.frame_id = "map"; //covered_path_grid_是costmap库中的占据栅格地图消息。
