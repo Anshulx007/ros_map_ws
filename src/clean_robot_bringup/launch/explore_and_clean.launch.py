@@ -21,7 +21,8 @@ def generate_launch_description():
         launch_arguments={
             'slam': 'True',
             'use_rviz': use_rviz,
-            'headless': headless
+            'headless': headless,
+            'world': '/home/anshul/ros2_ws/random_room.world'
         }.items()
     )
 
