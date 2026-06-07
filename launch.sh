@@ -1,20 +1,16 @@
 #!/bin/bash
 
 # Source local workspace setup
-if [ -f "/home/anshul/ros2_ws/install/setup.bash" ]; then
+if [ -f "/home/anshul/ros2_explore_final_backup/install/setup.bash" ]; then
     echo "Sourcing workspace setup..."
-    source /home/anshul/ros2_ws/install/setup.bash
+    source /home/anshul/ros2_explore_final_backup/install/setup.bash
 else
-    echo "Error: /home/anshul/ros2_ws/install/setup.bash not found. Please build the workspace first."
+    echo "Error: /home/anshul/ros2_explore_final_backup/install/setup.bash not found. Please build the workspace first."
     exit 1
 fi
 
-# Force Hardware Acceleration / GPU Rendering (Mesa & NVIDIA support, works in WSL2/Linux)
-export __NV_PRIME_RENDER_OFFLOAD=1
-export __GLX_VENDOR_LIBRARY_NAME=nvidia
-export MESA_D3D12_DEFAULT_ADAPTER_NAME=NVIDIA
-export LIBGL_ALWAYS_SOFTWARE=0
-export GALLIUM_DRIVER=zink
+# Force Software Rendering / CPU rendering (ensures compatibility in VMs and WSL2)
+export LIBGL_ALWAYS_SOFTWARE=1
 
 
 # Set default parameters (GUI enabled by default)

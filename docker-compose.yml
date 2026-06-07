@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  simulation:
+    build: .
+    container_name: ros2_explorer_sim
+    network_mode: host
+    ipc: host
+    pid: host
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      - LIBGL_ALWAYS_SOFTWARE=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ~/.Xauthority:/root/.Xauthority:rw
+    # By default, runs headless Gazebo with RViz active.
+    # To run without RViz and fully headless, change command to: use_rviz:=False headless:=True
+    command: use_rviz:=True headless:=True

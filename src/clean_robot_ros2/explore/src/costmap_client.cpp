@@ -117,8 +117,6 @@ Costmap2DClient::Costmap2DClient(rclcpp::Node::SharedPtr node, tf2_ros::Buffer* 
 
 void Costmap2DClient::updateFullMap(const nav_msgs::msg::OccupancyGrid::SharedPtr msg)
 {
-  global_frame_ = msg->header.frame_id;
-
   unsigned int size_in_cells_x = msg->info.width;
   unsigned int size_in_cells_y = msg->info.height;
   double resolution = msg->info.resolution;
@@ -143,12 +141,18 @@ void Costmap2DClient::updateFullMap(const nav_msgs::msg::OccupancyGrid::SharedPt
     costmap_data[i] = cost_translation_table__[cell_cost];
   }
   RCLCPP_DEBUG(node_->get_logger(), "map updated, written %lu values", costmap_size);
+
+  global_frame_ = msg->header.frame_id;
 }
 
 void Costmap2DClient::updatePartialMap(
     const map_msgs::msg::OccupancyGridUpdate::SharedPtr msg)
 {
   RCLCPP_DEBUG(node_->get_logger(), "received partial map update");
+  if (costmap_.getSizeInCellsX() == 0 || costmap_.getSizeInCellsY() == 0) {
+    RCLCPP_DEBUG(node_->get_logger(), "ignoring partial map update before full map is received");
+    return;
+  }
   global_frame_ = msg->header.frame_id;
 
   if (msg->x < 0 || msg->y < 0) {
