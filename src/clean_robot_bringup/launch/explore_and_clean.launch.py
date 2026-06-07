@@ -15,6 +15,10 @@ def generate_launch_description():
     use_rviz = LaunchConfiguration('use_rviz', default='True')
     headless = LaunchConfiguration('headless', default='True')
 
+    # Path to custom clean_robot.rviz
+    bringup_share_dir = get_package_share_directory('clean_robot_bringup')
+    custom_rviz_path = os.path.join(bringup_share_dir, 'rviz', 'clean_robot.rviz')
+
     # Simulation inclusion
     sim_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(sim_launch_path),
@@ -22,7 +26,8 @@ def generate_launch_description():
             'slam': 'True',
             'use_rviz': use_rviz,
             'headless': headless,
-            'world': '/home/anshul/ros2_ws/random_room.world'
+            'world': '/home/anshul/ros2_ws/random_room.world',
+            'rviz_config_file': custom_rviz_path
         }.items()
     )
 

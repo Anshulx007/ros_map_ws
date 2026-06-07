@@ -11,6 +11,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
         ('share/' + package_name + '/launch', ['launch/explore_and_clean.launch.py']),
+        ('share/' + package_name + '/rviz', ['rviz/clean_robot.rviz']),
     ],
     install_requires=['setuptools'],
     zip_safe=True,
